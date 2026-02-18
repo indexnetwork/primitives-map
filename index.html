@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Primitive Map</title>
+<meta name="description" content="Human coordination primitives — tracked and cataloged.">
+<meta property="og:title" content="Primitive Map">
+<meta property="og:description" content="Human coordination primitives — tracked and cataloged.">
+<meta property="og:url" content="https://index.network/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:creator" content="@indexnetwork_">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>◆</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Source Code Pro',monospace;background:#0d1117;color:#fff;min-height:100vh;-webkit-font-smoothing:antialiased}
+.container{max-width:56rem;margin:0 auto;padding:2rem 1rem}
+
+/* Intro */
+.intro{margin-bottom:2rem}
+.intro h1{font-size:1.5rem;font-weight:700;margin-bottom:.5rem}
+.intro p{font-size:.875rem;color:#9ca3af;line-height:1.8}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:2rem}
+@media(min-width:640px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{border:1px solid rgba(255,255,255,.1);border-radius:.5rem;padding:1rem;text-align:center}
+.stat-value{font-size:1.5rem;font-weight:700}
+.stat-label{font-size:.875rem;color:#9ca3af;margin-top:.25rem}
+
+/* Filters */
+.filters{margin-bottom:2rem}
+.filter-row{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-bottom:.75rem}
+.filter-label{font-size:.75rem;color:#6b7280;width:4rem;flex-shrink:0}
+.chip{padding:.25rem .75rem;font-size:.75rem;border-radius:9999px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#6b7280;cursor:pointer;transition:all .15s}
+.chip:hover{color:#d1d5db;border-color:rgba(255,255,255,.2)}
+.chip.active{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.1);color:#fff}
+.clear-btn{font-size:.75rem;color:#6b7280;background:none;border:none;cursor:pointer;text-decoration:underline}
+.clear-btn:hover{color:#d1d5db}
+
+/* Column header */
+.col-header{display:none;padding:.5rem 1rem;font-size:10px;color:#4b5563;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid rgba(255,255,255,.1)}
+@media(min-width:640px){.col-header{display:flex;align-items:center;gap:1rem}}
+.col-header .col-name{flex:1}
+.col-header .col-pillars{width:8rem}
+.col-header .col-rate{width:4rem;text-align:right}
+.col-header .col-tam{width:5rem;text-align:right}
+.col-header .col-maturity{width:5rem;text-align:right}
+.col-header .col-arrow{width:1rem}
+@media(max-width:767px){.col-header .col-pillars{display:none}}
+@media(max-width:1023px){.col-header .col-maturity{display:none}}
+
+/* Layer section */
+.layer{margin-bottom:1.5rem}
+.layer-header{display:flex;align-items:baseline;gap:.75rem;padding:.5rem 1rem;border-bottom:1px solid rgba(255,255,255,.1)}
+.layer-title{font-size:.875rem;font-weight:700}
+.layer-subtitle{font-size:.75rem;color:#6b7280}
+.layer-count{font-size:.75rem;color:#4b5563;margin-left:auto}
+
+/* Primitive row */
+.prim{border-bottom:1px solid rgba(255,255,255,.03)}
+.prim-btn{width:100%;text-align:left;padding:.75rem 1rem;display:flex;align-items:center;gap:1rem;background:none;border:none;color:#fff;cursor:pointer;font-family:inherit;font-size:inherit;transition:background .15s}
+.prim-btn:hover{background:rgba(255,255,255,.02)}
+.prim-name{flex:1;font-size:.875rem;font-weight:500;min-width:0}
+.prim-pillars{display:none;align-items:center;gap:.5rem}
+@media(min-width:768px){.prim-pillars{display:flex}}
+.pill{font-size:10px;padding:.125rem .5rem;border-radius:9999px;border:1px solid}
+.pill-Language{color:#60a5fa;border-color:rgba(96,165,250,.3)}
+.pill-Money{color:#4ade80;border-color:rgba(74,222,128,.3)}
+.pill-Coordination{color:#c084fc;border-color:rgba(192,132,252,.3)}
+.prim-rate,.prim-tam{font-size:.75rem;color:#9ca3af;text-align:right;display:none}
+@media(min-width:640px){.prim-rate{display:block;width:4rem}.prim-tam{display:block;width:5rem}}
+.prim-maturity{font-size:.75rem;text-align:right;width:5rem;display:none}
+@media(min-width:1024px){.prim-maturity{display:block}}
+.prim-arrow{width:1rem;height:1rem;color:#6b7280;transition:transform .2s;flex-shrink:0}
+.prim-arrow.open{transform:rotate(180deg)}
+
+/* Maturity colors */
+.mat-Theoretical{color:#6b7280}
+.mat-Experimental{color:#eab308}
+.mat-Emerging{color:#fb923c}
+.mat-Growing{color:#4ade80}
+.mat-Established{color:#34d399}
+
+/* Expanded detail */
+.prim-detail{overflow:hidden;max-height:0;transition:max-height .25s ease}
+.prim-detail.open{max-height:600px}
+.prim-detail-inner{padding:.25rem 1rem 1rem;font-size:.875rem}
+.prim-detail-inner > *+*{margin-top:.75rem}
+.prim-def{color:#d1d5db}
+.prim-replaces{font-size:.75rem}
+.prim-replaces .label{color:#6b7280}
+.prim-replaces .val{color:#9ca3af}
+.detail-stats{display:flex;flex-wrap:wrap;gap:1rem}
+.detail-stat .label{font-size:.75rem;color:#6b7280;display:block;margin-bottom:.25rem}
+.detail-stat .val{font-size:.875rem;color:#fff}
+.detail-pillars-mobile{display:flex;flex-wrap:wrap;gap:.25rem}
+@media(min-width:768px){.detail-pillars-mobile{display:none}}
+.detail-section .label{font-size:.75rem;color:#6b7280;display:block;margin-bottom:.25rem}
+.tags{display:flex;flex-wrap:wrap;gap:.25rem}
+.tag{font-size:.75rem;padding:.125rem .5rem;border-radius:.25rem;background:rgba(255,255,255,.05);color:#d1d5db}
+.tag .approach{color:#6b7280}
+.tag-outline{font-size:.75rem;padding:.125rem .5rem;border-radius:.25rem;border:1px solid rgba(255,255,255,.1);color:#9ca3af}
+
+/* Footer */
+.footer{text-align:center;padding:1.5rem 0;font-size:.75rem;color:#4b5563}
+</style>
+</head>
+<body>
+
+<div class="container" id="app"></div>
+
+<script src="data.js"></script>
+<script>
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+let filters={pillars:[],layers:[],maturities:[]};
+let expanded={};
+
+function toggle(arr,item){
+  const i=arr.indexOf(item);
+  if(i>-1)arr.splice(i,1);else arr.push(item);
+}
+
+// ---------------------------------------------------------------------------
+// Render
+// ---------------------------------------------------------------------------
+const $=id=>document.getElementById(id);
+const app=$('app');
+
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+function render(){
+  const fp=filters.pillars,fl=filters.layers,fm=filters.maturities;
+  const hasFilters=fp.length||fl.length||fm.length;
+
+  const filtered=LAYERS.map(lg=>{
+    const prims=lg.primitives.filter(p=>{
+      if(fp.length&&!p.pillars.some(x=>fp.includes(x)))return false;
+      if(fl.length&&!fl.includes(lg.layer))return false;
+      if(fm.length&&!fm.includes(p.maturity))return false;
+      return true;
+    });
+    return {...lg,primitives:prims};
+  }).filter(lg=>lg.primitives.length);
+
+  const totalVisible=filtered.reduce((s,lg)=>s+lg.primitives.length,0);
+  const totalAll=LAYERS.reduce((s,lg)=>s+lg.primitives.length,0);
+
+  const pillars=["Language","Money","Coordination"];
+  const layerOpts=["Foundation","Context","Intent","Interaction","Trust","Value","Coordination","Agents"];
+  const matOpts=["Theoretical","Experimental","Emerging","Growing","Established"];
+
+  function chipHTML(label,arr){
+    const active=arr.includes(label);
+    return `<button class="chip${active?' active':''}" data-filter="${label}">${esc(label)}</button>`;
+  }
+
+  let html=`
+    <div class="intro">
+      <h1>Primitive Map</h1>
+      <p>
+        Personal agents, messaging apps, feeds, CRMs, and calendars are
+        historical artifacts of product boundaries\u2014not fundamental
+        coordination primitives.
+        <br><br>
+        If natural language is the new API, primitives are bounded by human
+        language, not technics.
+        <br><br>
+        When language becomes the boundary, meaning replaces UI as the
+        organizing principle. The question follows naturally: how does
+        information organize around meaning?
+        <br><br>
+        Human coordination primitives surface as the interface\u2014shared
+        goals, common problems, intent, agreement, trust, and the broader
+        elements of information exchange and social behavior.
+        <br><br>
+        This map tracks and catalogs them.
+      </p>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-value">${SUMMARY.totalPrimitives}</div><div class="stat-label">Primitives</div></div>
+      <div class="stat"><div class="stat-value">${SUMMARY.totalLayers}</div><div class="stat-label">Layers</div></div>
+      <div class="stat"><div class="stat-value">${esc(SUMMARY.avgFormationRate)}</div><div class="stat-label">Formation Rate</div></div>
+      <div class="stat"><div class="stat-value">${esc(SUMMARY.totalTAM)}</div><div class="stat-label">TAM Unlocked</div></div>
+    </div>
+
+    <div class="filters">
+      <div class="filter-row"><span class="filter-label">Pillar</span>${pillars.map(p=>chipHTML(p,fp)).join('')}</div>
+      <div class="filter-row"><span class="filter-label">Layer</span>${layerOpts.map(l=>chipHTML(l,fl)).join('')}</div>
+      <div class="filter-row"><span class="filter-label">Maturity</span>${matOpts.map(m=>chipHTML(m,fm)).join('')}</div>
+      ${hasFilters?'<button class="clear-btn" id="clear-filters">Clear filters</button>':''}
+    </div>
+
+    <div class="col-header">
+      <span class="col-name">Primitive</span>
+      <span class="col-pillars">Pillars</span>
+      <span class="col-rate">Rate</span>
+      <span class="col-tam">TAM</span>
+      <span class="col-maturity">Maturity</span>
+      <span class="col-arrow"></span>
+    </div>`;
+
+  if(filtered.length){
+    filtered.forEach(lg=>{
+      html+=`<div class="layer">
+        <div class="layer-header">
+          <span class="layer-title">${esc(lg.label)}</span>
+          <span class="layer-subtitle">${esc(lg.subtitle)}</span>
+          <span class="layer-count">${lg.primitives.length} primitive${lg.primitives.length!==1?'s':''}</span>
+        </div>`;
+      lg.primitives.forEach(p=>{
+        const key=p.name;
+        const isOpen=expanded[key];
+        html+=`<div class="prim">
+          <button class="prim-btn" data-prim="${esc(key)}">
+            <span class="prim-name">${esc(p.name)}</span>
+            <span class="prim-pillars">${p.pillars.map(pl=>`<span class="pill pill-${pl}">${pl}</span>`).join('')}</span>
+            <span class="prim-rate">${esc(p.formationRate)}</span>
+            <span class="prim-tam">${esc(p.tamUnlocked)}</span>
+            <span class="prim-maturity mat-${p.maturity}">${p.maturity}</span>
+            <svg class="prim-arrow${isOpen?' open':''}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div class="prim-detail${isOpen?' open':''}">
+            <div class="prim-detail-inner">
+              <p class="prim-def">${esc(p.definition)}</p>
+              <div class="prim-replaces"><span class="label">Replaces: </span><span class="val">${esc(p.legacyEquivalent)}</span></div>
+              <div class="detail-stats">
+                <div class="detail-stat"><span class="label">Formation</span><span class="val">${esc(p.formationRate)}</span></div>
+                <div class="detail-stat"><span class="label">TAM Unlocked</span><span class="val">${esc(p.tamUnlocked)}</span></div>
+                <div class="detail-stat"><span class="label">Maturity</span><span class="val mat-${p.maturity}">${p.maturity}</span></div>
+              </div>
+              <div class="detail-pillars-mobile">${p.pillars.map(pl=>`<span class="pill pill-${pl}">${pl}</span>`).join('')}</div>
+              <div class="detail-section"><span class="label">Key Instantiations</span><div class="tags">${p.instantiations.map(i=>`<span class="tag">${esc(i.name)}${i.approach?`<span class="approach"> (${esc(i.approach)})</span>`:''}</span>`).join('')}</div></div>
+              <div class="detail-section"><span class="label">Composes With</span><div class="tags">${p.composesWith.map(c=>`<span class="tag-outline">${esc(c)}</span>`).join('')}</div></div>
+            </div>
+          </div>
+        </div>`;
+      });
+      html+=`</div>`;
+    });
+  }else{
+    html+=`<div style="text-align:center;padding:3rem 0;color:#6b7280;font-size:.875rem">No primitives match the current filters.</div>`;
+  }
+
+  html+=`<div class="footer">Showing ${totalVisible} of ${totalAll} primitives</div>`;
+  app.innerHTML=html;
+
+  // Bind events
+  document.querySelectorAll('.chip').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const v=btn.dataset.filter;
+      if(pillars.includes(v))toggle(fp,v);
+      else if(layerOpts.includes(v))toggle(fl,v);
+      else toggle(fm,v);
+      render();
+    });
+  });
+
+  document.querySelectorAll('.prim-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const k=btn.dataset.prim;
+      expanded[k]=!expanded[k];
+      render();
+    });
+  });
+
+  const clearBtn=document.getElementById('clear-filters');
+  if(clearBtn)clearBtn.addEventListener('click',()=>{
+    filters={pillars:[],layers:[],maturities:[]};
+    render();
+  });
+}
+
+render();
+</script>
+</body>
+</html>
